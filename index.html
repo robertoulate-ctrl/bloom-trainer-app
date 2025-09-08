@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grind n Conquer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .card { background-color: #1f2937; border: 1px solid #374151; }
+        .btn-primary { background-color: #ca8a04; color: #1f2937; transition: background-color 0.3s ease; }
+        .btn-primary:hover { background-color: #eab308; }
+        .btn-secondary { background-color: #4b5563; color: #e5e7eb; transition: background-color 0.3s ease; }
+        .btn-secondary:hover { background-color: #6b7280; }
+        .input-field, .select-field { background-color: #374151; border: 1px solid #4b5563; color: #d1d5db; }
+        .recipe-card { background-color: #111827; border: 1px solid #374151; }
+        .recipe-title { color: #eab308; }
+        .workflow-step { border-left: 2px solid #ca8a04; padding-left: 1rem; margin-bottom: 0.75rem; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-300">
+
+    <div class="w-full max-w-6xl mx-auto p-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="flex flex-col gap-8">
+            <header class="text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Grind n Conquer</h1>
+                <h2 class="text-2xl md:text-3xl font-semibold text-yellow-500">Coffee Battle Planner</h2>
+            </header>
+            <div class="card p-6 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-white mb-6 border-b border-gray-700 pb-3">Parámetros de Competencia</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="method" class="block text-sm font-medium text-gray-400 mb-1">Método</label>
+                        <select id="method" class="select-field w-full p-2 rounded-md focus:ring-2 focus:ring-yellow-500 focus:outline-none">
+                            <option value="V60">V60 Plástico</option>
+                            <option value="Origami">Origami Resina</option>
+                            <option value="SOLO">SOLO Dripper</option>
+                            <option value="UFO">UFO Acrílico</option>
+                            <option value="April">April Brewer</option>
+                            <option value="Graycano">Graycano</option>
+                            <option value="Aeropress">Aeropress</option>
+                        </select>
+                    </div>
+                    <div>
+                         <label for="process" class="block text-sm font-medium text-gray-400 mb-1">Proceso del Café</label>
+                        <select id="process" class="select-field w-full p-2 rounded-md focus:ring-2 focus:ring-yellow-500 focus:outline-none">
+                            <option value="Lavado">Lavado (Denso, Floral)</option>
+                            <option value="Honey">Honey (Equilibrado, Dulce)</option>
+                            <option value="Natural">Natural (Soluble, Frutal)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="grams" class="block text-sm font-medium text-gray-400 mb-1">Dosis (g)</label>
+                        <input type="number" id="grams" value="15.5" min="12" max="30" step="0.1" class="input-field w-full p-2 rounded-md focus:ring-2 focus:ring-yellow-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label for="ratio" class="block text-sm font-medium text-gray-400 mb-1">Ratio (1:X)</label>
+                        <input type="number" id="ratio" value="16" min="10" max="20" class="input-field w-full p-2 rounded-md focus:ring-2 focus:ring-yellow-500 focus:outline-none">
+                    </div>
+                </div>
+                <button id="generateBtn" class="btn-primary w-full mt-6 py-3 rounded-lg font-bold text-lg shadow-md">
+                    Crear Receta Ganadora
+                </button>
+            </div>
+            <section class="card p-6 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-3 text-center">Cronómetro de Competencia</h3>
+                <div class="text-center">
+                    <div id="timerDisplay" class="text-7xl md:text-8xl font-mono text-yellow-400 my-4 transition-colors duration-300">00:00</div>
+                    <div class="flex justify-center items-center space-x-4">
+                        <button id="startStopBtn" class="btn-primary w-32 py-3 rounded-lg font-bold text-lg shadow-md">Iniciar</button>
+                        <button id="resetBtn" class="btn-secondary w-32 py-3 rounded-lg font-bold text-lg shadow-md">Reiniciar</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div id="recipeOutput" class="recipe-card p-6 rounded-lg shadow-lg hidden">
+            <h3 class="text-3xl font-bold text-white mb-4 border-b border-gray-700 pb-3">Receta</h3>
+            <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                <div><h4 class="recipe-title font-semibold text-sm">AGUA TOTAL</h4><p id="totalWater" class="text-2xl font-bold text-white"></p></div>
+                <div><h4 class="recipe-title font-semibold text-sm">MOLIENDA (C40)</h4><p id="grindSetting" class="text-2xl font-bold text-white"></p></div>
+                <div><h4 class="recipe-title font-semibold text-sm">TEMP. AGUA</h4><p id="waterTemp" class="text-2xl font-bold text-white"></p></div>
+            </div>
+            <div class="mb-6"><h4 class="text-xl font-bold text-yellow-500 mb-2">Filosofía de Extracción</h4><p id="philosophy" class="text-sm italic text-gray-400"></p></div>
+            <div class="mb-6"><h4 class="text-xl font-bold text-yellow-500 mb-3">Estructura de Vertido Detallada</h4><ul id="pourStructure" class="space-y-2"></ul></div>
+            <div><h4 class="text-xl font-bold text-yellow-500 mb-3">Workflow de Competencia (8 Min)</h4><div id="workflow" class="space-y-3"></div></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Main App Logic ---
+        const generateBtn = document.getElementById('generateBtn');
+        generateBtn.addEventListener('click', generateRecipe);
+        
+        function generateRecipe() {
+            const method = document.getElementById('method').value;
+            const process = document.getElementById('process').value;
+            const grams = parseFloat(document.getElementById('grams').value);
+            const ratio = parseFloat(document.getElementById('ratio').value);
+            
+            const strategy = getCompetitionStrategy(method, process, grams, ratio);
+            displayRecipe(strategy);
+        }
+        
+        function displayRecipe(strategy) {
+            document.getElementById('totalWater').textContent = `${strategy.totalWater}g`;
+            document.getElementById('grindSetting').textContent = `${strategy.grind} clics`;
+            document.getElementById('waterTemp').textContent = strategy.temp;
+            document.getElementById('philosophy').textContent = strategy.philosophy;
+            
+            const pourList = document.getElementById('pourStructure');
+            pourList.innerHTML = '';
+            strategy.pourStructure.forEach(pour => {
+                const li = document.createElement('li');
+                li.innerHTML = pour;
+                pourList.appendChild(li);
+            });
+
+            const workflowContainer = document.getElementById('workflow');
+            workflowContainer.innerHTML = '';
+            const workflowSteps = getWorkflow(strategy.temp, strategy.grind, strategy.totalTime);
+            workflowSteps.forEach(step => {
+                const div = document.createElement('div');
+                div.className = 'workflow-step';
+                div.innerHTML = `<p class="font-bold text-gray-300">${step.time}</p><p class="text-sm text-gray-400">${step.action}</p>`;
+                workflowContainer.appendChild(div);
+            });
+
+            document.getElementById('recipeOutput').classList.remove('hidden');
+        }
+
+        // --- STRATEGY BRAIN (EXPERT VERSION) ---
+        function getCompetitionStrategy(method, process, grams, ratio) {
+            let strategy;
+
+            if (method === 'Aeropress') {
+                return getAeropressStrategy(process, grams, ratio);
+            }
+
+            switch(method) {
+                case 'V60':     strategy = getV60Strategy(ratio, grams); break;
+                case 'Origami': strategy = getOrigamiStrategy(ratio, grams); break;
+                case 'SOLO':    strategy = getSoloStrategy(ratio, grams); break;
+                case 'UFO':     strategy = getUfoStrategy(ratio, grams); break;
+                case 'April':   strategy = getAprilStrategy(ratio, grams); break;
+                case 'Graycano':strategy = getGraycanoStrategy(ratio, grams); break;
+                default:        strategy = getV60Strategy(ratio, grams);
+            }
+
+            if (process === 'Natural') strategy.grind += 3;
+            if (process === 'Lavado') strategy.grind -= 2;
+            if (grams <= 14) strategy.grind -= 2;
+            if (grams >= 25) strategy.grind += 4;
+
+            strategy.totalWater = Math.round(grams * ratio);
+            // Recalculate pour structure with the final total water
+            strategy.pourStructure = generatePourSteps(strategy.pourStructureConfig, strategy.totalWater, grams);
+
+            return strategy;
+        }
+
+        // --- Method-Specific Strategies ---
+        function getV60Strategy(ratio, grams) {
+            if (ratio <= 13) return { grind: 20, temp: "96°C", philosophy: "Estrategia Agresiva: Ratio corto. Molienda fina y alta temperatura para maximizar la extracción y evitar una taza agria.", pourStructureConfig: { bloomMultiplier: 3, numPours: 5 }, totalTime: "2:45-3:00"};
+            if (ratio >= 18) return { grind: 28, temp: "92°C > 85°C", philosophy: "Estrategia Defensiva: Ratio largo. Molienda gruesa y temperatura variable para añadir volumen sin extraer amargor.", pourStructureConfig: { bloomMultiplier: 3, numPours: 2, customPours: [0.6] }, totalTime: "2:45-3:15"};
+            return { grind: 24, temp: "93°C", philosophy: "Estrategia Equilibrada: Ratio estándar. Receta de Lance Hedrick para una taza balanceada, dulce y limpia.", pourStructureConfig: { bloomMultiplier: 3, numPours: 3, customPours: [120/250, 190/250] }, totalTime: "2:45-3:00"};
+        }
+        function getOrigamiStrategy(ratio, grams) {
+            if (ratio <= 13) return { grind: 21, temp: "96°C", philosophy: "Defensa contra Subextracción: Molienda fina y múltiples pulsos para alargar el tiempo de contacto con poca agua.", pourStructureConfig: { bloomMultiplier: 2.5, numPours: 5 }, totalTime: "2:45-3:15"};
+            if (ratio >= 18) return { grind: 29, temp: "88-90°C", philosophy: "Defensa contra Sobreextracción: Molienda gruesa y baja temperatura. Vertidos grandes y suaves.", pourStructureConfig: { bloomMultiplier: 3, numPours: 3 }, totalTime: "3:15-4:00"};
+            return { grind: 26, temp: "91°C", philosophy: "Estrategia del Campeón (Carlos Medina): 5 pulsos simétricos para maximizar consistencia, equilibrio y dulzor.", pourStructureConfig: { bloomMultiplier: 3, numPours: 5 }, totalTime: "2:40-3:30"};
+        }
+        function getSoloStrategy(ratio, grams) {
+            if (ratio <= 13) return { grind: 19, temp: "95°C", philosophy: "Ataque de Alta Velocidad: Molienda muy fina y pulsos pequeños para forzar la extracción, aprovechando el flujo rápido.", pourStructureConfig: { bloomMultiplier: 3, numPours: 4 }, totalTime: "2:30-2:50"};
+            if (ratio >= 18) return { grind: 28, temp: "93°C > 85°C", philosophy: "Control de Daños (Técnica G. Peng): Molienda gruesa y temp. variable. Clave para ratios largos.", pourStructureConfig: { bloomMultiplier: 3, numPours: 2, customPours: [0.6] }, totalTime: "2:45-3:15"};
+            return { grind: 24, temp: "93°C", philosophy: "Punto Dulce Equilibrado: Receta estándar para el SOLO, buscando claridad y dulzor.", pourStructureConfig: { bloomMultiplier: 3, numPours: 2, customPours: [0.6] }, totalTime: "2:00-2:30"};
+        }
+        function getUfoStrategy(ratio, grams) {
+            if (ratio <= 13) return { grind: 21, temp: "96°C", philosophy: "El Sprinter Agresivo: Molienda fina y múltiples pulsos para maximizar la extracción con poco volumen de agua.", pourStructureConfig: { bloomMultiplier: 3, numPours: 2, customPours: [0.65] }, totalTime: "2:15-2:45"};
+            if (ratio >= 18) return { grind: 30, temp: "90°C > 85°C", philosophy: "El Maratonista Táctico: Molienda gruesa y temperatura variable para evitar la sobreextracción en ratios largos.", pourStructureConfig: { bloomMultiplier: 2.5, numPours: 2, customPours: [0.6] }, totalTime: "3:15-3:45"};
+            return { grind: 26, temp: "93°C", philosophy: "El Navegador Constante: Receta base para el UFO, buscando equilibrio, dulzor y una taza limpia y reproducible.", pourStructureConfig: { bloomMultiplier: 3, numPours: 3, customPours: [0.5, 0.8] }, totalTime: "2:45-3:15"};
+        }
+        function getAprilStrategy(ratio, grams) {
+            if (ratio <= 13) return { grind: 24, temp: "100°C", philosophy: "El Extractor: Molienda fina y un solo vertido rápido con agua hirviendo para forzar la extracción en tiempo récord.", pourStructureConfig: { bloomMultiplier: 3, numPours: 1 }, totalTime: "2:00-2:15"};
+            if (ratio >= 18) return { grind: 31, temp: "95°C > 85°C", philosophy: "El Controlador: Molienda gruesa y temperatura variable para añadir volumen sin extraer amargor. Estrategia de control para ratios largos.", pourStructureConfig: { bloomMultiplier: 3, numPours: 2, customPours: [0.55] }, totalTime: "3:15-3:45"};
+            return { grind: 28, temp: "100°C", philosophy: "Maximizador de Dulzor: Receta clásica del April con molienda gruesa y agua hirviendo para una taza dulce y consistente.", pourStructureConfig: { bloomMultiplier: 3, numPours: 2, customPours: [0.6] }, totalTime: "2:30-3:00"};
+        }
+        function getGraycanoStrategy(ratio, grams) {
+            if (ratio <= 13) return { grind: 20, temp: "89°C", philosophy: "Máxima Eficiencia: Molienda muy fina con temperatura controlada. La estabilidad térmica del Graycano permite esta extracción precisa.", pourStructureConfig: { bloomMultiplier: 2.5, numPours: 3, customPours: [0.45, 0.7] }, totalTime: "2:30-2:50"};
+            if (ratio >= 18) return { grind: 29, temp: "89°C", philosophy: "Control de Sobre-Extracción: Molienda gruesa y vertidos suaves para reducir la eficiencia de extracción con alto volumen de agua.", pourStructureConfig: { bloomMultiplier: 2.5, numPours: 2, customPours: [0.6] }, totalTime: "3:20-3:40"};
+            return { grind: 25, temp: "89°C", philosophy: "Extracción Criogénica (Receta L. Hedrick): Temperatura baja para resaltar notas florales y acidez compleja en cafés lavados.", pourStructureConfig: { bloomMultiplier: 3, numPours: 3, customPours: [0.5, 0.8] }, totalTime: "2:50-3:15"};
+        }
+        function getAeropressStrategy(process, grams, ratio) {
+            let grind = 20;
+            if (process === 'Natural') grind += 2;
+            if (process === 'Lavado') grind -= 2;
+            const immersionWater = Math.round(grams * 12.5);
+            const totalWater = Math.round(grams * ratio);
+            const bypassWater = Math.max(0, totalWater - immersionWater);
+            return {
+                grind: grind, temp: "88°C",
+                philosophy: `Estrategia de Bypass: El ratio se ajusta con agua de bypass para un control total. Se crea un concentrado perfecto y se diluye a la fuerza deseada, evitando riesgos.`,
+                pourStructure: [
+                    `<strong>Preparación:</strong> Usar método invertido. Añade ${grams}g de café.`,
+                    `<strong>Inmersión (0:00 - 1:30):</strong> Vierte <strong>${immersionWater}g</strong> de agua, agita y espera.`,
+                    `<strong>Prensado (1:30 - 2:00):</strong> Prensar suavemente por 30 segundos.`,
+                    `<strong>Bypass Final:</strong> Añadir <strong>${bypassWater}g</strong> de agua caliente directamente a la jarra para alcanzar el ratio final.`
+                ],
+                totalTime: "2:00-2:15", totalWater: totalWater
+            };
+        }
+        
+        // --- Dynamic Pour Structure Generator ---
+        function generatePourSteps(config, totalWater, grams) {
+            const steps = [];
+            const bloomWater = Math.round(grams * config.bloomMultiplier);
+            steps.push(`<strong>Bloom (0:00 - 0:45):</strong> Vierte hasta <strong>${bloomWater}g</strong>. Agita suavemente (swirl) para saturar uniformemente.`);
+            
+            const waterRemaining = totalWater - bloomWater;
+            if (waterRemaining <= 0) return steps;
+
+            let accumulatedWater = bloomWater;
+            
+            if (config.customPours) {
+                 // Use predefined percentages for specific recipes
+                for (let i = 0; i < config.customPours.length; i++) {
+                    const pourTarget = Math.round(totalWater * config.customPours[i]);
+                    const pourTime = formatTime(45 + (i * 30));
+                     steps.push(`<strong>Vertido ${i + 1} (${pourTime}):</strong> Vierte hasta alcanzar un total de <strong>${pourTarget}g</strong>.`);
+                     accumulatedWater = pourTarget;
+                }
+                const finalPourTime = formatTime(45 + (config.customPours.length * 30));
+                steps.push(`<strong>Vertido Final (${finalPourTime}):</strong> Vierte suavemente hasta alcanzar <strong>${totalWater}g</strong>.`);
+
+            } else {
+                 // Distribute remaining water evenly
+                const pourSize = Math.round(waterRemaining / config.numPours);
+                for (let i = 1; i <= config.numPours; i++) {
+                    const pourTime = formatTime(45 + ((i - 1) * 30));
+                    accumulatedWater += pourSize;
+                    const targetWater = Math.min(accumulatedWater, totalWater);
+                    steps.push(`<strong>Vertido ${i} (${pourTime}):</strong> Vierte hasta alcanzar un total de <strong>${targetWater}g</strong>.`);
+                }
+            }
+            return steps;
+        }
+
+        // --- Workflow and Timer ---
+        function getWorkflow(temp, grind, totalTime) {
+            return [
+                { time: "Fase 1: Análisis y Estrategia (0:00 - 1:30)", action: `Recibe las variables. Analiza el aroma del café en grano. Formula tu hipótesis (ej. 'Huele a fresa, parece un natural'). Basado en esto, define tus parámetros: <strong>Molienda ${grind} clics, Agua a ${temp}</strong>. Inicia la tetera y purga el filtro mientras anuncias tu plan.` },
+                { time: "Fase 2: Ejecución y Adaptación (1:30 - 6:30)", action: `<strong>1:30-2:30:</strong> Muele el café. Realiza el bloom y observa la reacción. <br><strong>2:30-${totalTime.split('-')[0]}:</strong> Ejecuta los vertidos. <strong>Adapta en tiempo real:</strong> si el drenaje es muy rápido, vierte más lento; si es lento, agita suavemente (swirl). <br><strong>${totalTime.split('-')[0]}-6:30:</strong> Durante el drawdown final, limpia tu estación y describe los sabores que esperas.` },
+                { time: "Fase 3: Servicio y Conclusión (6:30 - 8:00)", action: `<strong>6:30-7:30:</strong> Retira el dripper. Homogeniza con un swirl. Sirve 150ml. <br><strong>7:30-8:00:</strong> Presenta las tazas, resume el perfil de sabor y anuncia <strong>'¡Tiempo!'</strong>.` }
+            ];
+        }
+        function formatTime(totalSeconds) { const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60; return `${minutes}:${String(seconds).padStart(2, '0')}`; }
+        const timerDisplay = document.getElementById('timerDisplay');
+        const startStopBtn = document.getElementById('startStopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        let timerInterval = null, seconds = 0, isRunning = false;
+        const MAX_SECONDS = 8 * 60;
+        function updateTimerDisplay() { const minutes = Math.floor(seconds / 60); const remainingSeconds = seconds % 60; timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`; if (seconds >= MAX_SECONDS - 30) { timerDisplay.classList.replace('text-yellow-400', 'text-red-500'); } else { timerDisplay.classList.replace('text-red-500', 'text-yellow-400'); } }
+        function startTimer() { if (isRunning) return; isRunning = true; startStopBtn.textContent = 'Detener'; startStopBtn.classList.replace('btn-primary', 'btn-secondary'); timerInterval = setInterval(() => { seconds++; updateTimerDisplay(); if (seconds >= MAX_SECONDS) stopTimer(); }, 1000); }
+        function stopTimer() { if (!isRunning) return; isRunning = false; startStopBtn.textContent = 'Iniciar'; startStopBtn.classList.replace('btn-secondary', 'btn-primary'); clearInterval(timerInterval); }
+        function resetTimer() { stopTimer(); seconds = 0; updateTimerDisplay(); }
+        startStopBtn.addEventListener('click', () => { if (isRunning) stopTimer(); else startTimer(); });
+        resetBtn.addEventListener('click', resetTimer);
+    </script>
+</body>
+</html>
