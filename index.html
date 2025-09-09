@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grind & Brew - Bloom Battles Coach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            color: #E5E7EB;
+        }
+        .control-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        .control-panel::-webkit-scrollbar-track {
+            background: #1F2937;
+        }
+        .control-panel::-webkit-scrollbar-thumb {
+            background-color: #4B5563;
+            border-radius: 20px;
+            border: 2px solid #1F2937;
+        }
+        .timer-display {
+            font-weight: 900; /* Black weight */
+            font-feature-settings: 'tnum' on, 'lnum' on;
+        }
+        .result-card {
+            border: 1px solid #374151;
+            background-color: #1F2937;
+        }
+        .btn-primary {
+            background-color: #F59E0B;
+            color: #111827;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #FBBF24;
+        }
+        .btn-secondary {
+            background-color: #374151;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover {
+            background-color: #4B5563;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #F59E0B;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #F59E0B;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-amber-400">Grind <span class="text-white">&</span> Brew</h1>
+            <p class="text-gray-400 mt-2">Tu Asistente de Preparación para Bloom Battles</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Columna de Controles -->
+            <div class="lg:col-span-1 space-y-6 p-6 bg-[#1F2937] rounded-xl border border-[#374151] h-max control-panel overflow-y-auto">
+                <h2 class="text-2xl font-bold border-b-2 border-amber-400 pb-2">Variables de Preparación</h2>
+                
+                <div>
+                    <label for="method" class="block text-sm font-medium text-gray-300 mb-1">1. Método</label>
+                    <select id="method" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:ring-amber-500 focus:border-amber-500">
+                        <option value="V60 Plastico">V60 Plástico</option>
+                        <option value="Origami Resina">Origami Resina</option>
+                        <option value="SOLO Dripper">SOLO Dripper</option>
+                        <option value="UFO acrilico">UFO Acrílico</option>
+                        <option value="April">April Dripper</option>
+                        <option value="Graycano">Graycano</option>
+                        <option value="Aeropress Original">Aeropress Original</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="process" class="block text-sm font-medium text-gray-300 mb-1">2. Proceso del Café</label>
+                    <select id="process" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:ring-amber-500 focus:border-amber-500">
+                        <option value="Lavado">Lavado</option>
+                        <option value="Honey">Honey</option>
+                        <option value="Natural">Natural</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter" class="block text-sm font-medium text-gray-300 mb-1">3. Filtro de Papel</label>
+                    <select id="filter" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:ring-amber-500 focus:border-amber-500"></select>
+                </div>
+
+                <div>
+                    <label for="dose" class="block text-sm font-medium text-gray-300 mb-1">4. Dósis: <span id="doseValue" class="font-bold text-amber-400">21g</span></label>
+                    <input id="dose" type="range" min="12" max="30" value="21" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                </div>
+                
+                <div>
+                    <label for="ratio" class="block text-sm font-medium text-gray-300 mb-1">5. Ratio: <span id="ratioValue" class="font-bold text-amber-400">1:16</span></label>
+                    <input id="ratio" type="range" min="10" max="20" value="16" step="0.5" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <button id="generateBtn" class="w-full btn-primary font-bold py-3 rounded-md text-lg">
+                    ¡Generar Receta!
+                </button>
+            </div>
+
+            <!-- Columna de Resultados -->
+            <div class="lg:col-span-2 space-y-6">
+                <div id="resultsPanel" class="hidden space-y-6">
+                    <!-- Resumen y Parámetros -->
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="result-card rounded-lg p-4 text-center">
+                            <h3 class="text-sm font-semibold text-gray-400">Agua Total</h3>
+                            <p id="totalWater" class="text-2xl font-bold text-amber-400">248g</p>
+                        </div>
+                        <div class="result-card rounded-lg p-4 text-center">
+                            <h3 class="text-sm font-semibold text-gray-400">Molienda (C40)</h3>
+                            <p id="grind" class="text-2xl font-bold text-amber-400">26 clicks</p>
+                        </div>
+                        <div class="result-card rounded-lg p-4 text-center">
+                            <h3 class="text-sm font-semibold text-gray-400">Temperatura</h3>
+                            <p id="temp" class="text-2xl font-bold text-amber-400">93°C</p>
+                        </div>
+                    </div>
+
+                    <!-- Filosofía de Extracción -->
+                    <div class="result-card rounded-lg p-6">
+                        <h3 class="text-lg font-bold text-amber-400 mb-2">Filosofía de Extracción</h3>
+                        <p id="philosophy" class="text-gray-300"></p>
+                    </div>
+
+                    <!-- Estructura de Vertido -->
+                    <div class="result-card rounded-lg p-6">
+                        <h3 class="text-lg font-bold text-amber-400 mb-3">Estructura de Vertido</h3>
+                        <div id="pouringStructure" class="space-y-3"></div>
+                    </div>
+                </div>
+
+                 <!-- Workflow y Cronómetro -->
+                <div class="result-card rounded-lg p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                        <div>
+                            <h3 class="text-lg font-bold text-amber-400 mb-3">Workflow de Competencia (8 Min)</h3>
+                            <ul id="workflow" class="list-none space-y-2 text-sm">
+                                <li><strong>0:00-1:00:</strong> Iniciar tetera, pesar granos, preparar método y filtro.</li>
+                                <li><strong>1:00-2:00:</strong> Moler el café (aprox. 45-60s).</li>
+                                <li><strong>2:00-2:30:</strong> Enjuagar filtro, pre-calentar método y jarra.</li>
+                                <li><strong>2:30-6:30:</strong> Añadir café molido y ejecutar la preparación (aprox. 3-4 min).</li>
+                                <li><strong>6:30-7:30:</strong> Permitir drawdown final, limpiar estación.</li>
+                                <li><strong>7:30-8:00:</strong> Agitar jarra, servir 150ml con confianza.</li>
+                            </ul>
+                        </div>
+                        <div class="text-center p-4 bg-gray-900 rounded-lg">
+                            <h3 class="text-lg font-bold text-amber-400 mb-2">Cronómetro</h3>
+                            <div id="timerDisplay" class="text-6xl timer-display text-white mb-4">08:00</div>
+                            <div class="flex justify-center space-x-3">
+                                <button id="startTimer" class="btn-secondary px-4 py-2 rounded-md font-semibold">Iniciar</button>
+                                <button id="stopTimer" class="btn-secondary px-4 py-2 rounded-md font-semibold">Detener</button>
+                                <button id="resetTimer" class="btn-secondary px-4 py-2 rounded-md font-semibold">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="placeholder" class="result-card rounded-lg p-10 text-center">
+                    <p class="text-gray-400">Selecciona tus variables y genera tu guía de preparación.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const methodSelect = document.getElementById('method');
+            const processSelect = document.getElementById('process');
+            const filterSelect = document.getElementById('filter');
+            const doseSlider = document.getElementById('dose');
+            const doseValue = document.getElementById('doseValue');
+            const ratioSlider = document.getElementById('ratio');
+            const ratioValue = document.getElementById('ratioValue');
+            const generateBtn = document.getElementById('generateBtn');
+            const resultsPanel = document.getElementById('resultsPanel');
+            const placeholder = document.getElementById('placeholder');
+            
+            // --- Lógica de la Base de Datos de Recetas ---
+            const recipeDB = {
+                'V60 Plastico': {
+                    'Lavado': { baseGrind: 24, baseTemp: 94, pours: [{p:0.2}, {p:0.28}, {p:0.28}, {p:0.24}], philosophy: "Buscamos una extracción clara y brillante para resaltar la acidez cítrica y las notas florales. La estructura de 4 vertidos mantiene una cama de café estable y promueve un desarrollo equilibrado del dulzor."},
+                    'Honey': { baseGrind: 25, baseTemp: 92, pours: [{p:0.2}, {p:0.28}, {p:0.28}, {p:0.24}], philosophy: "El objetivo es el equilibrio. La temperatura moderada y la molienda ligeramente más gruesa resaltan el dulzor y cuerpo del proceso Honey sin opacar la acidez frutal. Vertidos suaves para una taza sedosa."},
+                    'Natural': { baseGrind: 27, baseTemp: 90, pours: [{p:0.25}, {p:0.4}, {p:0.35}], philosophy: "Preparación controlada. Con un café natural, usamos una temperatura más baja y molienda gruesa para manejar la fermentación. Buscamos una taza jugosa y dulce, evitando la astringencia y sabores sobre-extraídos."}
+                },
+                'Origami Resina': {
+                    'Lavado': { baseGrind: 26, baseTemp: 91, pours: [{p:0.2}, {p:0.2}, {p:0.2}, {p:0.2}, {p:0.2}], philosophy: "Inspirado en Carlos Medina. La estructura simétrica de 5 pulsos en el Origami, que es más permisivo, asegura una extracción extremadamente consistente y replicable, ideal para maximizar la claridad y dulzor de un lavado."},
+                    'Honey': { baseGrind: 27, baseTemp: 92, pours: [{p:0.2}, {p:0.2}, {p:0.2}, {p:0.2}, {p:0.2}], philosophy: "Usamos la consistencia del método de 5 pulsos para extraer el dulzor complejo del Honey de manera uniforme. El flujo rápido del Origami ayuda a mantener la taza limpia y sin pesadez."},
+                    'Natural': { baseGrind: 29, baseTemp: 90, pours: [{p:0.25}, {p:0.4}, {p:0.35}], philosophy: "El flujo de aire del Origami favorece una extracción controlada con una molienda más gruesa, manteniendo los sabores frutales del natural vibrantes pero definidos, no fangosos."}
+                },
+                'SOLO Dripper': {
+                    'Lavado': { baseGrind: 24, baseTemp: 93, pours: [{p:0.2}, {p:0.4}, {p:0.4}], philosophy: "Con este dripper rápido, podemos moler más fino para una extracción eficiente. El objetivo es una taza con acidez vibrante, alto dulzor y una claridad excepcional, aprovechando el rápido drawdown."},
+                    'Honey': { baseGrind: 25, baseTemp: 92, pours: [{p:0.2}, {p:0.4}, {p:0.4}], philosophy: "Adaptación de la técnica de George Peng. Un bloom y dos vertidos principales. El flujo rápido ayuda a resaltar el cuerpo y dulzor del honey manteniendo una taza limpia y sin amargor final."},
+                    'Natural': { baseGrind: 26, baseTemp: 89, pours: [{p:0.25}, {p:0.75}], philosophy: "Este método es ideal para un café natural. El flujo ultra-rápido permite una extracción rápida que captura toda la fruta y dulzor sin el riesgo de estancamiento. Un bloom y un solo vertido largo y suave para una taza limpia y explosiva."}
+                },
+                'UFO acrilico': {
+                    'Lavado': { baseGrind: 26, baseTemp: 93, pours: [{p:0.2}, {p:0.3}, {p:0.3}, {p:0.2}], philosophy: "El UFO destaca por su consistencia. Esta receta de 4 pulsos produce una taza dulce, equilibrada y limpia, perfecta para resaltar un lavado sin complicaciones."},
+                    'Honey': { baseGrind: 27, baseTemp: 92, pours: [{p:0.2}, {p:0.3}, {p:0.3}, {p:0.2}], philosophy: "Aprovechamos el diseño permisivo del UFO para una extracción uniforme del Honey. El resultado es una taza con gran cuerpo, dulzor pronunciado y acidez balanceada. Es difícil equivocarse."},
+                    'Natural': { baseGrind: 28, baseTemp: 90, pours: [{p:0.25}, {p:0.4}, {p:0.35}], philosophy: "Enfoque en consistencia. El diseño del UFO es muy permisivo, ideal para un natural volátil. La molienda gruesa y temperatura controlada aseguran una taza frutal sin los sabores fermentados indeseables."}
+                },
+                'April': {
+                    'Lavado': { baseGrind: 28, baseTemp: 96, pours: [{p:0.2}, {p:0.4}, {p:0.4}], philosophy: "Maximizador de dulzor. La molienda gruesa y el agua muy caliente en un fondo plano crean una extracción uniforme que resalta el cuerpo y la dulzura, equilibrando perfectamente la acidez de un lavado."},
+                    'Honey': { baseGrind: 29, baseTemp: 94, pours: [{p:0.2}, {p:0.4}, {p:0.4}], philosophy: "El fondo plano es ideal para el dulzor inherente del Honey. Esta receta busca una taza con una textura casi almibarada, mucho cuerpo y notas de fruta de hueso muy presentes."},
+                    'Natural': { baseGrind: 30, baseTemp: 92, pours: [{p:0.25}, {p:0.75}], philosophy: "Un enfoque directo. Con la molienda más gruesa y un solo vertido después del bloom, buscamos un drawdown rápido en el fondo plano para obtener una taza de natural sorprendentemente limpia y jugosa."}
+                },
+                'Graycano': {
+                    'Lavado': { baseGrind: 25, baseTemp: 89, pours: [{p:0.2}, {p:0.3}, {p:0.3}, {p:0.2}], philosophy: "Extracción Criogénica. La increíble retención de calor del Graycano nos permite usar agua a menor temperatura para extraer delicadamente las notas más florales y complejas de un lavado de alta calidad."},
+                    'Honey': { baseGrind: 26, baseTemp: 90, pours: [{p:0.2}, {p:0.3}, {p:0.3}, {p:0.2}], philosophy: "La estabilidad térmica del Graycano asegura una extracción súper consistente del Honey. La baja temperatura resalta un dulzor más refinado y una acidez más compleja."},
+                    'Natural': { baseGrind: 27, baseTemp: 88, pours: [{p:0.25}, {p:0.4}, {p:0.35}], philosophy: "Control térmico para un café complejo. La temperatura muy baja y la estabilidad del Graycano nos dan el máximo control sobre el natural, resultando en una taza frutal pero elegante y sin astringencia."}
+                },
+                'Aeropress Original': {
+                    'Lavado': { baseGrind: 18, baseTemp: 92, pours: [{p:1}], philosophy: "Buscamos claridad y una acidez chispeante. La temperatura más alta y molienda fina en inmersión controlada extraen el carácter vibrante del lavado. El bypass mantiene la bebida balanceada."},
+                    'Honey': { baseGrind: 20, baseTemp: 88, pours: [{p:1}], philosophy: "Método invertido para maximizar cuerpo y dulzor. La temperatura moderada y la inmersión total extraen las notas a miel y fruta madura. El bypass asegura una taza rica pero no empalagosa."},
+                    'Natural': { baseGrind: 22, baseTemp: 85, pours: [{p:1}], philosophy: "Control de la fermentación. Una temperatura baja y una molienda más gruesa evitan la sobre-extracción de sabores vinosos. El resultado es una taza de natural sorprendentemente limpia, dulce y jugosa."}
+                },
+            };
+            
+            // --- Lógica del Cronómetro ---
+            let timerInterval;
+            let totalSeconds = 8 * 60;
+
+            const updateTimerDisplay = () => {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                document.getElementById('timerDisplay').textContent = 
+                    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            };
+
+            document.getElementById('startTimer').addEventListener('click', () => {
+                clearInterval(timerInterval);
+                if (totalSeconds > 0) {
+                    timerInterval = setInterval(() => {
+                        totalSeconds--;
+                        updateTimerDisplay();
+                        if (totalSeconds <= 0) {
+                            clearInterval(timerInterval);
+                            // Opcional: alerta o sonido
+                        }
+                    }, 1000);
+                }
+            });
+
+            document.getElementById('stopTimer').addEventListener('click', () => {
+                clearInterval(timerInterval);
+            });
+
+            document.getElementById('resetTimer').addEventListener('click', () => {
+                clearInterval(timerInterval);
+                totalSeconds = 8 * 60;
+                updateTimerDisplay();
+            });
+
+            // --- Lógica de la Interfaz ---
+            const updateFilterOptions = () => {
+                const method = methodSelect.value;
+                filterSelect.innerHTML = '';
+                let options = [];
+
+                if (method === 'Aeropress Original') {
+                    options = ['Filtro Estándar Aeropress'];
+                } else if (method === 'April') {
+                    options = ['Kalita Wave 155', 'Sibarist FAST Flat (FLAT)'];
+                } else if (method === 'Origami Resina') {
+                    options = ['CAFEC Cup 4 (TH1 / V60 02)', 'Sibarist FAST Conical (CONE)', 'Kalita Wave 155', 'Sibarist FAST Flat (FLAT)'];
+                } else { // Conical Drippers
+                    options = ['CAFEC Cup 4 (TH1 / V60 02)', 'Sibarist FAST Conical (CONE)'];
+                }
+
+                options.forEach(opt => {
+                    const optionEl = document.createElement('option');
+                    optionEl.value = opt;
+                    optionEl.textContent = opt;
+                    filterSelect.appendChild(optionEl);
+                });
+            };
+
+            const updateSliderValues = () => {
+                doseValue.textContent = `${doseSlider.value}g`;
+                const isAeropress = methodSelect.value === 'Aeropress Original';
+                 if(isAeropress) {
+                    ratioSlider.disabled = true;
+                    ratioValue.textContent = 'N/A (Bypass)';
+                    ratioValue.parentElement.classList.add('text-gray-500');
+                } else {
+                    ratioSlider.disabled = false;
+                    ratioValue.textContent = `1:${ratioSlider.value}`;
+                    ratioValue.parentElement.classList.remove('text-gray-500');
+                }
+            };
+            
+            const generateRecipe = () => {
+                const method = methodSelect.value;
+                const process = processSelect.value;
+                const filter = filterSelect.value;
+                const dose = parseFloat(doseSlider.value);
+                const ratio = parseFloat(ratioSlider.value);
+
+                let totalWater;
+                let finalGrind;
+                let finalTemp;
+                
+                const baseRecipe = recipeDB[method][process];
+                if (!baseRecipe) {
+                    alert("No se encontró una receta para esta combinación.");
+                    return;
+                }
+                
+                // Calcular parámetros clave
+                finalGrind = baseRecipe.baseGrind;
+                finalTemp = baseRecipe.baseTemp;
+
+                // Ajustes de Molienda
+                if (dose < 15) finalGrind -= 2;
+                if (dose > 25) finalGrind += 2;
+                if (filter.includes('Sibarist')) finalGrind -= 1; // Moler más fino para filtros rápidos
+                if (filter.includes('Kalita')) finalGrind +=1;
+                
+                if (method !== 'Aeropress Original') {
+                     if (ratio < 13) finalGrind -= 2;
+                     if (ratio > 18) finalGrind += 2;
+                     totalWater = Math.round(dose * ratio);
+                } else { // Aeropress Logic
+                    totalWater = Math.round(dose * 12.5); // Agua para concentrado
+                }
+
+
+                // Poblar resultados
+                document.getElementById('totalWater').textContent = `${totalWater}g` + (method === 'Aeropress Original' ? ' (+ Bypass)' : '');
+                document.getElementById('grind').textContent = `${finalGrind} clicks`;
+                document.getElementById('temp').textContent = `${finalTemp}°C`;
+                document.getElementById('philosophy').textContent = baseRecipe.philosophy;
+
+                // Poblar estructura de vertido
+                const pouringDiv = document.getElementById('pouringStructure');
+                pouringDiv.innerHTML = '';
+                let accumulatedWater = 0;
+                let waterForPours = totalWater;
+
+                if (method === 'Aeropress Original') {
+                    const concentrationWater = totalWater;
+                    const bypassWater = Math.max(0, 220 - concentrationWater); // Apunta a 220ml finales aprox.
+                    pouringDiv.innerHTML = `
+                        <div class="grid grid-cols-3 gap-2 items-center">
+                            <div class="font-bold">0:00 - 0:15</div>
+                            <div class="text-amber-400 font-semibold">Vierte ${concentrationWater}g de agua</div>
+                            <div class="text-right text-gray-400">Total: ${concentrationWater}g</div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 items-center">
+                            <div class="font-bold">0:15 - 1:30</div>
+                            <div class="text-amber-400 font-semibold">Inmersión y agitación suave</div>
+                            <div class="text-right text-gray-400"></div>
+                        </div>
+                         <div class="grid grid-cols-3 gap-2 items-center">
+                            <div class="font-bold">1:30 - 2:00</div>
+                            <div class="text-amber-400 font-semibold">Prensa suave por 30s</div>
+                            <div class="text-right text-gray-400"></div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 items-center">
+                            <div class="font-bold">Final</div>
+                            <div class="text-amber-400 font-semibold">Añade ~${bypassWater}g de agua (Bypass)</div>
+                            <div class="text-right text-gray-400"></div>
+                        </div>
+                    `;
+                } else {
+                    let bloomWater = Math.round(waterForPours * baseRecipe.pours[0].p);
+                    if (bloomWater < dose * 2.5) bloomWater = Math.round(dose * 3); // Assure a good bloom
+
+                    accumulatedWater += bloomWater;
+                    
+                    const bloomEl = document.createElement('div');
+                    bloomEl.className = 'grid grid-cols-3 gap-2 items-center';
+                    bloomEl.innerHTML = `
+                        <div class="font-bold">0:00 - 0:45</div>
+                        <div class="text-amber-400 font-semibold">Bloom: Vierte ${bloomWater}g</div>
+                        <div class="text-right text-gray-400">Total: ${accumulatedWater}g</div>`;
+                    pouringDiv.appendChild(bloomEl);
+                    
+                    const remainingWater = totalWater - bloomWater;
+                    const remainingPours = baseRecipe.pours.slice(1);
+                    const totalProportion = remainingPours.reduce((sum, p) => sum + p.p, 0);
+
+                    let pourTime = 45;
+
+                    remainingPours.forEach((pour, index) => {
+                        const pourWater = Math.round((pour.p / totalProportion) * remainingWater);
+                        accumulatedWater += pourWater;
+                        
+                        // Asegurarse de que el último vertido complete el total
+                        if (index === remainingPours.length - 1) {
+                            const diff = totalWater - accumulatedWater;
+                            accumulatedWater += diff;
+                        }
+                        
+                        const pourEl = document.createElement('div');
+                        pourEl.className = 'grid grid-cols-3 gap-2 items-center';
+                        pourEl.innerHTML = `
+                            <div class="font-bold">${new Date(pourTime * 1000).toISOString().substr(14, 5)}</div>
+                            <div class="text-amber-400 font-semibold">Vierte ${pourWater}g</div>
+                            <div class="text-right text-gray-400">Total: ${accumulatedWater}g</div>`;
+                        pouringDiv.appendChild(pourEl);
+                        pourTime += 30; // Add 30-35 seconds between pours
+                    });
+                }
+
+
+                resultsPanel.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            };
+
+            // Event Listeners
+            methodSelect.addEventListener('change', () => {
+                updateFilterOptions();
+                updateSliderValues();
+            });
+            doseSlider.addEventListener('input', updateSliderValues);
+            ratioSlider.addEventListener('input', updateSliderValues);
+            generateBtn.addEventListener('click', generateRecipe);
+
+            // Inicialización
+            updateFilterOptions();
+            updateSliderValues();
+            updateTimerDisplay();
+        });
+    </script>
+</body>
+</html>
