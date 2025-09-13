@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111827"/>
+    <title>Grind & Brew - Bloom Battles Coach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #E5E7EB; }
+        .control-panel::-webkit-scrollbar { width: 8px; }
+        .control-panel::-webkit-scrollbar-track { background: #1F2937; }
+        .control-panel::-webkit-scrollbar-thumb { background-color: #4B5563; border-radius: 20px; border: 2px solid #1F2937; }
+        .timer-display { font-weight: 900; font-feature-settings: 'tnum' on, 'lnum' on; background-color: #000; padding: 10px 20px; border-radius: 8px; border: 2px solid #374151; box-shadow: 0 0 15px rgba(0,0,0,0.5) inset; }
+        .result-card { border: 1px solid #374151; background-color: #1F2937; }
+        .btn-primary { background-color: #F59E0B; color: #111827; transition: background-color: 0.3s; }
+        .btn-primary:hover { background-color: #FBBF24; }
+        .btn-secondary { background-color: #374151; transition: background-color: 0.3s; }
+        .btn-secondary:hover { background-color: #4B5563; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #F59E0B; cursor: pointer; border-radius: 50%; }
+        input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: #F59E0B; cursor: pointer; border-radius: 50%; }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-amber-400">Grind <span class="text-white">&</span> Brew</h1>
+            <p class="text-gray-400 mt-2">Tu Asistente de Preparación para Bloom Battles</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Columna de Controles -->
+            <div class="lg:col-span-1 space-y-6 p-6 bg-[#1F2937] rounded-xl border border-[#374151] h-max control-panel overflow-y-auto">
+                <h2 class="text-2xl font-bold border-b-2 border-amber-400 pb-2">Variables de Preparación</h2>
+                
+                <div>
+                    <label for="method" class="block text-sm font-medium text-gray-300 mb-1">1. Método</label>
+                    <select id="method" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:ring-amber-500 focus:border-amber-500">
+                        <option value="V60 Plastico">V60 Plástico</option>
+                        <option value="Origami Resina">Origami Resina</option>
+                        <option value="SOLO Dripper">SOLO Dripper</option>
+                        <option value="UFO acrilico">UFO Acrílico</option>
+                        <option value="April">April Dripper</option>
+                        <option value="Graycano">Graycano</option>
+                        <option value="Aeropress Original">Aeropress Original</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="process" class="block text-sm font-medium text-gray-300 mb-1">2. Proceso del Café</label>
+                    <select id="process" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:ring-amber-500 focus:border-amber-500">
+                        <option value="Lavado">Lavado</option>
+                        <option value="Honey">Honey</option>
+                        <option value="Natural">Natural</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter" class="block text-sm font-medium text-gray-300 mb-1">3. Filtro de Papel</label>
+                    <select id="filter" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:ring-amber-500 focus:border-amber-500"></select>
+                </div>
+
+                <div>
+                    <label for="dose" class="block text-sm font-medium text-gray-300 mb-1">4. Dósis: <span id="doseValue" class="font-bold text-amber-400">18g</span></label>
+                    <input id="dose" type="range" min="12" max="30" value="18" step="0.5" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                </div>
+                
+                <div>
+                    <label for="ratio" class="block text-sm font-medium text-gray-300 mb-1">5. Ratio: <span id="ratioValue" class="font-bold text-amber-400">1:16</span></label>
+                    <input id="ratio" type="range" min="10" max="20" value="16" step="0.5" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <div class="pt-2">
+                    <button id="generateBtn" class="w-full btn-primary font-bold py-3 rounded-md text-lg">
+                        ¡Generar Receta!
+                    </button>
+                    <button id="randomizeBtn" class="w-full btn-secondary font-semibold py-2 rounded-md text-sm mt-3">
+                        Simular Rifa (Dosis y Ratio)
+                    </button>
+                    <button id="showEquivalentsBtn" class="w-full btn-secondary font-semibold py-2 rounded-md text-sm mt-3">
+                        Mostrar Equivalencias de Molienda
+                    </button>
+                </div>
+                
+                <div class="text-center pt-4">
+                    <h3 class="text-lg font-bold text-amber-400 mb-2">Cronómetro</h3>
+                    <div id="timerDisplay" class="text-6xl timer-display text-white mb-4">08:00</div>
+                    <div class="flex justify-center space-x-3">
+                        <button id="startTimer" class="btn-secondary px-4 py-2 rounded-md font-semibold">Iniciar</button>
+                        <button id="stopTimer" class="btn-secondary px-4 py-2 rounded-md font-semibold">Detener</button>
+                        <button id="resetTimer" class="btn-secondary px-4 py-2 rounded-md font-semibold">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-6">
+                <div id="resultsPanel" class="hidden space-y-6">
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="result-card rounded-lg p-4 text-center"><h3 class="text-sm font-semibold text-gray-400">Agua Total</h3><p id="totalWater" class="text-2xl font-bold text-amber-400">-</p></div>
+                        <div class="result-card rounded-lg p-4 text-center"><h3 class="text-sm font-semibold text-gray-400">Molienda (C40)</h3><p id="grind" class="text-2xl font-bold text-amber-400">-</p></div>
+                        <div class="result-card rounded-lg p-4 text-center"><h3 class="text-sm font-semibold text-gray-400">Temperatura</h3><p id="temp" class="text-2xl font-bold text-amber-400">-</p></div>
+                    </div>
+                    
+                    <div id="equivalentsPanel" class="result-card rounded-lg p-6 hidden">
+                        <h3 class="text-lg font-bold text-amber-400 mb-3">Equivalencias de Molienda (Aprox.)</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center">
+                             <div class="bg-gray-800 p-3 rounded-md"><h4 class="text-sm font-semibold text-gray-400">Timemore S3</h4><p id="timemoreGrind" class="text-xl font-bold text-white">-</p></div>
+                             <div class="bg-gray-800 p-3 rounded-md"><h4 class="text-sm font-semibold text-gray-400">1Zpresso J-Ultra</h4><p id="jUltraGrind" class="text-xl font-bold text-white">-</p></div>
+                             <div class="bg-gray-800 p-3 rounded-md"><h4 class="text-sm font-semibold text-gray-400">1Zpresso K-Max</h4><p id="kMaxGrind" class="text-xl font-bold text-white">-</p></div>
+                        </div>
+                    </div>
+
+                    <div class="result-card rounded-lg p-6"><h3 class="text-lg font-bold text-amber-400 mb-2">Filosofía de Extracción</h3><p id="philosophy" class="text-gray-300"></p></div>
+                    <div class="result-card rounded-lg p-6"><h3 class="text-lg font-bold text-amber-400 mb-3">Estructura de Vertido</h3><div id="pouringStructure" class="space-y-3"></div></div>
+                </div>
+
+                <div class="result-card rounded-lg p-6"><h3 class="text-lg font-bold text-amber-400 mb-3">Workflow de Competencia (8 Min)</h3><ul id="workflow" class="list-none space-y-2 text-sm"></ul></div>
+                <div id="placeholder" class="result-card rounded-lg p-10 text-center"><p class="text-gray-400">Selecciona tus variables y genera tu guía de preparación.</p></div>
+            </div>
+        </div>
+        
+        <!-- Changelog Section -->
+        <footer class="mt-12 pt-8 border-t border-gray-700">
+            <h2 class="text-2xl font-bold text-center text-white mb-6">Historial de Cambios (Changelog)</h2>
+            <div class="max-w-3xl mx-auto space-y-4">
+                 <div class="result-card rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-bold text-amber-400">Versión 1.3</h3>
+                        <p class="text-sm text-gray-400">15 de Septiembre, 2025</p>
+                    </div>
+                    <ul class="list-disc list-inside space-y-2 text-gray-300">
+                        <li><strong>Lógica de Equivalencias Corregida:</strong> La función de equivalencias de molienda ha sido reconstruida para usar los rangos de la tabla de conversión oficial, ofreciendo estimaciones mucho más precisas.</li>
+                        <li><strong>Molinos Actualizados:</strong> El panel de equivalencias ahora muestra los molinos correctos según el archivo: Timemore S3, 1Zpresso J-Ultra, y 1Zpresso K-Max.</li>
+                    </ul>
+                </div>
+                 <div class="result-card rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-bold text-amber-400">Versión 1.2</h3>
+                        <p class="text-sm text-gray-400">14 de Septiembre, 2025</p>
+                    </div>
+                    <ul class="list-disc list-inside space-y-2 text-gray-300">
+                        <li><strong>Recetas Expertas para April & SOLO:</strong> Lógica de recetas para April Dripper y SOLO Dripper actualizada con estrategias avanzadas de manuales de competencia, incluyendo temperatura variable y ajustes por dósis.</li>
+                        <li><strong>Precisión de Molienda Mejorada:</strong> Se refina el cálculo de molienda para considerar el tipo de filtro seleccionado (ej. Sibarist vs. Kalita).</li>
+                    </ul>
+                </div>
+                <div class="result-card rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-bold text-amber-400">Versión 1.0</h3>
+                        <p class="text-sm text-gray-400">13 de Septiembre, 2025</p>
+                    </div>
+                    <ul class="list-disc list-inside space-y-2 text-gray-300">
+                        <li><strong>Lanzamiento Inicial:</strong> Creación de la aplicación "Grind & Brew".</li>
+                        <li><strong>Motor de Recetas Avanzado:</strong> Lógica basada en manuales de competencia y recetas de campeones mundiales.</li>
+                        <li><strong>Soporte para 7 Métodos:</strong> Recetas específicas para V60, Origami, SOLO, UFO, April, Graycano y Aeropress.</li>
+                        <li><strong>Estrategia de Bypass para Aeropress:</strong> Implementación de cálculo de bypass basado en el ratio final.</li>
+                    </ul>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js'); }); }
+        document.addEventListener('DOMContentLoaded', () => {
+            const ui = {
+                method: document.getElementById('method'), process: document.getElementById('process'), filter: document.getElementById('filter'),
+                doseSlider: document.getElementById('dose'), doseValue: document.getElementById('doseValue'),
+                ratioSlider: document.getElementById('ratio'), ratioValue: document.getElementById('ratioValue'),
+                generateBtn: document.getElementById('generateBtn'), randomizeBtn: document.getElementById('randomizeBtn'),
+                showEquivalentsBtn: document.getElementById('showEquivalentsBtn'),
+                resultsPanel: document.getElementById('resultsPanel'), placeholder: document.getElementById('placeholder'),
+                equivalentsPanel: document.getElementById('equivalentsPanel'), totalWater: document.getElementById('totalWater'),
+                grind: document.getElementById('grind'), temp: document.getElementById('temp'),
+                philosophy: document.getElementById('philosophy'), pouringStructure: document.getElementById('pouringStructure'),
+                workflow: document.getElementById('workflow'), timemoreGrind: document.getElementById('timemoreGrind'),
+                jUltraGrind: document.getElementById('jUltraGrind'), kMaxGrind: document.getElementById('kMaxGrind'),
+                timerDisplay: document.getElementById('timerDisplay'),
+                startTimer: document.getElementById('startTimer'), stopTimer: document.getElementById('stopTimer'), resetTimer: document.getElementById('resetTimer')
+            };
+            let currentC40Grind = null;
+            let currentMethod = 'V60 Plastico';
+            
+            const strategies = {
+                'V60 Plastico': (ratio) => {
+                    if (ratio <= 13) return { baseGrind: 20, baseTemp: 96, pours: [{p:0.25}, {p:0.175}, {p:0.175}, {p:0.175}, {p:0.225}], p_text: "Estrategia Agresiva: Ratio corto. Molienda fina y alta temperatura para maximizar la extracción y evitar una taza agria."};
+                    if (ratio >= 18) return { baseGrind: 28, baseTemp: '92°C > 85°C', pours: [{p:0.2}, {p:0.45}, {p:0.35}], p_text: "Estrategia Defensiva: Ratio largo. Molienda gruesa y temperatura variable para añadir volumen sin extraer amargor."};
+                    return { baseGrind: 24, baseTemp: 93, pours: [{p:0.2}, {p:0.28}, {p:0.28}, {p:0.24}], p_text: "Estrategia Equilibrada: Ratio estándar. Receta de Lance Hedrick para una taza balanceada, dulce y limpia."};
+                },
+                'Origami Resina': (ratio) => {
+                    if (ratio <= 13) return { baseGrind: 21, baseTemp: 96, pours: [{p:0.19}, {p:0.20}, {p:0.20}, {p:0.20}, {p:0.21}], p_text: "Defensa contra Subextracción: Molienda fina y múltiples pulsos para alargar el tiempo de contacto con poca agua."};
+                    if (ratio >= 18) return { baseGrind: 29, baseTemp: 89, pours: [{p:0.18}, {p:0.27}, {p:0.27}, {p:0.28}], p_text: "Defensa contra Sobreextracción: Molienda gruesa y baja temperatura. Vertidos grandes y suaves."};
+                    return { baseGrind: 26, baseTemp: 91, pours: [{p:0.2}, {p:0.2}, {p:0.2}, {p:0.2}, {p:0.2}], p_text: "Estrategia del Campeón (Carlos Medina): 5 pulsos simétricos para maximizar consistencia, equilibrio y dulzor."};
+                },
+                'SOLO Dripper': (ratio, dose) => {
+                    let baseGrind = 24;
+                    if (dose >= 17 && dose < 19) baseGrind = 26;
+                    if (dose >= 19) baseGrind = 28;
+                    if (ratio <= 13) return { baseGrind: baseGrind - 2, baseTemp: 95, pours: [{p:0.22}, {p:0.39}, {p:0.39}], p_text: "Ataque de Alta Velocidad: Molienda fina para forzar la extracción, aprovechando el flujo rápido del dripper."};
+                    if (ratio >= 18) return { baseGrind: baseGrind + 2, baseTemp: 93, pours: [{p:0.18}, {p:0.41}, {p:0.41}], p_text: "Control de Daños: Molienda más gruesa para manejar el alto volumen de agua y evitar un final astringente."};
+                    return { baseGrind: baseGrind, baseTemp: 93, pours: [{p:0.2}, {p:0.4}, {p:0.4}], p_text: "Punto Dulce Equilibrado (G. Peng): Receta estándar para el SOLO, buscando claridad y un dulzor pronunciado."};
+                },
+                'UFO acrilico': (ratio) => {
+                    if (ratio <= 13) return { baseGrind: 21, baseTemp: 96, pours: [{p:0.27}, {p:0.365}, {p:0.365}], p_text: "El Sprinter Agresivo: Molienda fina y pulsos concentrados para maximizar la extracción con poco volumen de agua."};
+                    if (ratio >= 18) return { baseGrind: 30, baseTemp: '90°C > 85°C', pours: [{p:0.17}, {p:0.415}, {p:0.415}], p_text: "El Maratonista Táctico: Molienda gruesa y temperatura variable para evitar la sobreextracción en ratios largos."};
+                    return { baseGrind: 26, baseTemp: 93, pours: [{p:0.2}, {p:0.3}, {p:0.3}, {p:0.2}], p_text: "El Navegador Constante: Receta base para el UFO, buscando equilibrio, dulzor y una taza limpia y reproducible."};
+                },
+                'April': (ratio) => {
+                    if (ratio <= 13) return { baseGrind: 24, baseTemp: 99, pours: [{p:0.25}, {p:0.75}], p_text: "El Extractor: Molienda fina y un solo vertido rápido con agua hirviendo para forzar la extracción en tiempo récord."};
+                    if (ratio >= 18) return { baseGrind: 31, baseTemp: '95°C > 85°C', pours: [{p:0.18}, {p:0.36}, {p:0.46}], p_text: "El Controlador: Molienda gruesa y temperatura variable para añadir volumen sin extraer amargor. Estrategia de control para ratios largos."};
+                    return { baseGrind: 28, baseTemp: 100, pours: [{p:0.2}, {p:0.4}, {p:0.4}], p_text: "Maximizador de Dulzor: Receta clásica del April con molienda gruesa y agua hirviendo para una taza dulce y consistente."};
+                },
+                'Graycano': (ratio) => {
+                    if (ratio <= 13) return { baseGrind: 20, baseTemp: 89, pours: [{p:0.22}, {p:0.26}, {p:0.26}, {p:0.26}], p_text: "Máxima Eficiencia: Molienda muy fina con temperatura controlada. La estabilidad térmica del Graycano permite esta extracción precisa."};
+                    if (ratio >= 18) return { baseGrind: 29, baseTemp: 89, pours: [{p:0.17}, {p:0.415}, {p:0.415}], p_text: "Control de Sobre-Extracción: Molienda gruesa y vertidos suaves para reducir la eficiencia de extracción con alto volumen de agua."};
+                    return { baseGrind: 25, baseTemp: 89, pours: [{p:0.2}, {p:0.3}, {p:0.3}, {p:0.2}], p_text: "Extracción Criogénica (Receta L. Hedrick): Temperatura baja para resaltar notas florales y acidez compleja en cafés lavados."};
+                }
+            };
+
+            let timerInterval; let totalSeconds = 8 * 60;
+            const updateTimerDisplay = () => { ui.timerDisplay.textContent = `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}`; };
+            ui.startTimer.addEventListener('click', () => { clearInterval(timerInterval); if (totalSeconds > 0) { timerInterval = setInterval(() => { totalSeconds--; updateTimerDisplay(); if (totalSeconds <= 0) clearInterval(timerInterval); }, 1000); } });
+            ui.stopTimer.addEventListener('click', () => clearInterval(timerInterval));
+            ui.resetTimer.addEventListener('click', () => { clearInterval(timerInterval); totalSeconds = 8 * 60; updateTimerDisplay(); });
+            
+            const updateGrindEquivalents = (c40clicks, method) => {
+                const mapRange = (value, inMin, inMax, outMin, outMax) => {
+                    const percentage = (value - inMin) / (inMax - inMin);
+                    const clampedPercentage = Math.max(0, Math.min(1, percentage));
+                    const result = outMin + clampedPercentage * (outMax - outMin);
+                    return result;
+                };
+
+                const isAeropress = method === 'Aeropress Original';
+
+                const ranges = {
+                    c40: isAeropress ? { min: 13, max: 27 } : { min: 17, max: 28 },
+                    timemoreS3: isAeropress ? { min: 2.5, max: 7.0 } : { min: 3.5, max: 7.0 },
+                    jUltra: isAeropress ? { min: 140, max: 360 } : { min: 180, max: 360 }, // Using a numeric representation 1.4.0 -> 140
+                    kMax: isAeropress ? { min: 45, max: 125 } : { min: 65, max: 125 } // 0.4.5 -> 45
+                };
+                
+                const formatJUltra = (val) => `${Math.floor(val / 100)}.${Math.floor((val % 100) / 10)}.${Math.round(val % 10)}`;
+                const formatKMax = (val) => `${Math.floor(val / 100)}.${Math.floor((val % 100) / 10)}.${Math.round(val % 10)}`;
+
+                ui.timemoreGrind.textContent = mapRange(c40clicks, ranges.c40.min, ranges.c40.max, ranges.timemoreS3.min, ranges.timemoreS3.max).toFixed(1);
+                ui.jUltraGrind.textContent = formatJUltra(mapRange(c40clicks, ranges.c40.min, ranges.c40.max, ranges.jUltra.min, ranges.jUltra.max));
+                ui.kMaxGrind.textContent = formatKMax(mapRange(c40clicks, ranges.c40.min, ranges.c40.max, ranges.kMax.min, ranges.kMax.max));
+            };
+
+            const updateFilterOptions = () => {
+                currentMethod = ui.method.value;
+                ui.filter.innerHTML = '';
+                const options = currentMethod === 'Aeropress Original' ? ['Filtro Estándar Aeropress'] : (currentMethod === 'April' ? ['Kalita Wave 155', 'Sibarist FAST Flat'] : (currentMethod === 'Origami Resina' ? ['CAFEC Cup 4 (V60 02)', 'Sibarist FAST Conical', 'Kalita Wave 155'] : ['CAFEC Cup 4 (V60 02)', 'Sibarist FAST Conical']));
+                options.forEach(opt => { const el = document.createElement('option'); el.value = el.textContent = opt; ui.filter.appendChild(el); });
+            };
+            const updateSliderValues = () => {
+                ui.doseValue.textContent = `${ui.doseSlider.value}g`;
+                ui.ratioValue.textContent = `1:${ui.ratioSlider.value}`;
+            };
+            const randomizeValues = () => {
+                const rand = (min, max, step = 1) => min + Math.floor(Math.random() * ((max - min) / step + 1)) * step;
+                ui.doseSlider.value = rand(parseFloat(ui.doseSlider.min), parseFloat(ui.doseSlider.max), parseFloat(ui.doseSlider.step));
+                ui.ratioSlider.value = rand(parseFloat(ui.ratioSlider.min), parseFloat(ui.ratioSlider.max), parseFloat(ui.ratioSlider.step));
+                updateSliderValues();
+            };
+
+            const generateRecipe = () => {
+                ui.equivalentsPanel.classList.add('hidden');
+                const [method, process, filter, dose, ratio] = [ui.method.value, ui.process.value, ui.filter.value, parseFloat(ui.doseSlider.value), parseFloat(ui.ratioSlider.value)];
+
+                if (method === 'Aeropress Original') {
+                    let baseGrind = 20;
+                    if (process === 'Lavado') baseGrind -= 2; if (process === 'Natural') baseGrind += 2;
+                    if (ratio < 14) baseGrind -=1;
+                    const immersionWater = Math.round(dose * 12.5);
+                    const totalWater = Math.round(dose * ratio);
+                    const bypassWater = Math.max(0, totalWater - immersionWater);
+                    currentC40Grind = baseGrind;
+
+                    ui.totalWater.textContent = `${totalWater}g`;
+                    ui.grind.textContent = `${baseGrind} clicks`;
+                    ui.temp.textContent = `${process === 'Lavado' ? 92 : (process === 'Natural' ? 85 : 88)}°C`;
+                    ui.philosophy.textContent = "La estrategia de bypass te da control total. Creas un concentrado perfecto y lo diluyes a la fuerza deseada, evitando riesgos.";
+                    ui.pouringStructure.innerHTML = `<div class="grid grid-cols-3 gap-2 items-center"><div class="font-bold">0:00-0:15</div><div class="text-amber-400 font-semibold">Inmersión: Vierte ${immersionWater}g</div><div class="text-right text-gray-400">Total: ${immersionWater}g</div></div><div class="grid grid-cols-3 gap-2 items-center"><div class="font-bold">0:15-1:30</div><div class="text-amber-400 font-semibold">Agita y espera</div><div></div></div><div class="grid grid-cols-3 gap-2 items-center"><div class="font-bold">1:30-2:00</div><div class="text-amber-400 font-semibold">Prensa suave por 30s</div><div></div></div><div class="grid grid-cols-3 gap-2 items-center"><div class="font-bold">Final</div><div class="text-amber-400 font-semibold">Añade ${bypassWater}g (Bypass)</div><div class="text-right text-gray-400">Total: ${totalWater}g</div></div>`;
+                    ui.workflow.innerHTML = `<li><strong>0:00-1:30:</strong> Prepara equipo y muele café.</li><li><strong>1:30-3:30:</strong> Ejecuta la inmersión y prensado.</li><li><strong>3:30-4:30:</strong> Añade el agua de bypass y homogeniza.</li><li><strong>4:30-8:00:</strong> Limpia estación y sirve con confianza.</li>`;
+                
+                } else {
+                    const strategy = strategies[method](ratio, dose);
+                    let finalGrind = strategy.baseGrind;
+                    if (process === 'Natural') finalGrind += 2; if (process === 'Lavado') finalGrind -= 1;
+                    if (filter.includes('Sibarist')) finalGrind -= 2; if (filter.includes('Kalita')) finalGrind += 1;
+                    currentC40Grind = finalGrind;
+                    const totalWater = Math.round(dose * ratio);
+
+                    ui.totalWater.textContent = `${totalWater}g`;
+                    ui.grind.textContent = `${finalGrind} clicks`;
+                    ui.temp.textContent = `${strategy.baseTemp}`;
+                    ui.philosophy.textContent = strategy.p_text;
+                    
+                    ui.pouringStructure.innerHTML = '';
+                    let accumulatedWater = 0;
+                    let bloomWater = Math.round(totalWater * strategy.pours[0].p);
+                    if (bloomWater < dose * 2.5) bloomWater = Math.round(dose * 3);
+                    if (bloomWater > totalWater) bloomWater = totalWater;
+                    accumulatedWater += bloomWater;
+
+                    ui.pouringStructure.innerHTML = `<div class="grid grid-cols-3 gap-2 items-center"><div class="font-bold">0:00-0:45</div><div class="text-amber-400 font-semibold">Bloom: Vierte ${bloomWater}g</div><div class="text-right text-gray-400">Total: ${accumulatedWater}g</div></div>`;
+
+                    const remainingWater = totalWater - accumulatedWater;
+                    const remainingPours = strategy.pours.slice(1);
+                    const totalProportion = remainingPours.reduce((sum, p) => sum + p.p, 0);
+                    let pourTime = 45;
+                    remainingPours.forEach((pour, index) => {
+                        if (remainingWater <= 0) return;
+                        let pourWater = totalProportion > 0 ? Math.round((pour.p / totalProportion) * remainingWater) : Math.round(remainingWater / remainingPours.length);
+                        if (index === remainingPours.length - 1) pourWater = totalWater - accumulatedWater;
+                        if (accumulatedWater + pourWater > totalWater) pourWater = totalWater - accumulatedWater;
+                        accumulatedWater += pourWater;
+                        const pourEl = document.createElement('div');
+                        pourEl.className = 'grid grid-cols-3 gap-2 items-center';
+                        pourEl.innerHTML = `<div class="font-bold">${new Date(pourTime * 1000).toISOString().substr(14, 5)}</div><div class="text-amber-400 font-semibold">Vierte ${pourWater}g</div><div class="text-right text-gray-400">Total: ${accumulatedWater}g</div>`;
+                        ui.pouringStructure.appendChild(pourEl);
+                        pourTime += 30;
+                    });
+                     ui.workflow.innerHTML = `<li><strong>0:00-2:30:</strong> Prepara equipo y muele café.</li><li><strong>2:30-6:30:</strong> Ejecuta la preparación (aprox. 3-4 min).</li><li><strong>6:30-8:00:</strong> Limpia estación y sirve.</li>`;
+                }
+                ui.resultsPanel.classList.remove('hidden');
+                ui.placeholder.classList.add('hidden');
+            };
+
+            ui.method.addEventListener('change', () => { updateFilterOptions(); updateSliderValues(); });
+            ['input', 'change'].forEach(evt => {
+                ui.doseSlider.addEventListener(evt, updateSliderValues);
+                ui.ratioSlider.addEventListener(evt, updateSliderValues);
+            });
+            ui.generateBtn.addEventListener('click', generateRecipe);
+            ui.randomizeBtn.addEventListener('click', randomizeValues);
+            ui.showEquivalentsBtn.addEventListener('click', () => {
+                if (currentC40Grind) { updateGrindEquivalents(currentC40Grind, currentMethod); ui.equivalentsPanel.classList.remove('hidden'); } 
+                else { alert("Primero debes generar una receta."); }
+            });
+            updateFilterOptions();
+            updateSliderValues();
+            updateTimerDisplay();
+        });
+    </script>
+</body>
+</html>
