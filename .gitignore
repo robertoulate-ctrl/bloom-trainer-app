@@ -1,0 +1,4 @@
+node_modules/
+playwright-report/
+server.log
+test-results/

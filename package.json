@@ -1,0 +1,19 @@
+{
+  "name": "grind-and-brew",
+  "version": "1.0.0",
+  "description": "Grind & Brew - Bloom Battles Coach",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080",
+    "test": "start-server-and-test start http://127.0.0.1:8080 test:e2e",
+    "test:e2e": "npx playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.45.0",
+    "http-server": "^14.1.1",
+    "start-server-and-test": "^2.0.4"
+  }
+}
